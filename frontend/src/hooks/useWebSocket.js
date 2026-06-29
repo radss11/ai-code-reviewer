@@ -6,7 +6,7 @@ function useWebSocket(prId, onMessage) {
   useEffect(() => {
     if (!prId) return;
 
-    const ws = new WebSocket(`${import.meta.env.VITE_WS_URL}/ws/${prId}`);
+    const ws = new WebSocket(`ws://localhost:8000/ws/${prId}`);
     wsRef.current = ws;
 
     ws.onopen = () => console.log("WebSocket connected:", prId);
@@ -22,7 +22,6 @@ function useWebSocket(prId, onMessage) {
 
     ws.onerror = (e) => {
       console.error("WebSocket error:", e);
-      onMessage({ error: "Connection error. Is the backend running?" });
     };
 
     ws.onclose = () => console.log("WebSocket closed");
@@ -35,4 +34,4 @@ function useWebSocket(prId, onMessage) {
   return wsRef;
 }
 
-export default useWebSocket;  
+export default useWebSocket;

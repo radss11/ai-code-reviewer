@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import redis.asyncio as aioredis
 import os
@@ -19,6 +19,12 @@ app.add_middleware(
 )
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
+API_KEY = os.getenv("API_KEY")
+
+
+def verify_api_key(x_api_key: str = Header(...)):
+    if x_api_key != API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API key")
 
 
 @app.on_event("startup")
@@ -32,7 +38,8 @@ def root():
 
 
 @app.post("/review")
-async def trigger_review(payload: dict):
+async def trigger_review(payload: dict, x_api_key: str = Header(...)):
+    verify_api_key(x_api_key)
     pr_url = payload.get("pr_url")
     if not pr_url:
         return {"error": "pr_url is required"}
@@ -47,7 +54,8 @@ async def trigger_review(payload: dict):
 
 
 @app.get("/history")
-def history():
+def history(x_api_key: str = Header(...)):
+    verify_api_key(x_api_key)
     try:
         return get_all_reviews()
     except Exception as e:
@@ -55,7 +63,8 @@ def history():
 
 
 @app.get("/history/{pr_id}")
-def history_by_pr(pr_id: str):
+def history_by_pr(pr_id: str, x_api_key: str = Header(...)):
+    verify_api_key(x_api_key)
     try:
         return get_reviews_by_pr(pr_id)
     except Exception as e:

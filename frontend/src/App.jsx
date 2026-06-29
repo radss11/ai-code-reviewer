@@ -11,10 +11,7 @@ function App() {
   const [error, setError] = useState("");
 
   useWebSocket(prId, (message) => {
-    if (message.error) {
-      setError(message.error);
-      setLoading(false);
-    } else if (message.done) {
+    if (message.done) {
       setDone(true);
       setLoading(false);
     } else {
@@ -29,9 +26,12 @@ function App() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/review`, {
+      const res = await fetch("http://localhost:8000/review", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": "randomly_generated_api_key"
+        },
         body: JSON.stringify({ pr_url: url }),
       });
       const data = await res.json();
