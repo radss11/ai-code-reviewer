@@ -89,3 +89,12 @@ services:
       redis:
         condition: service_healthy
     command: python kafka_consumer.py
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend

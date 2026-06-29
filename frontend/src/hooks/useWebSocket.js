@@ -6,7 +6,7 @@ function useWebSocket(prId, onMessage) {
   useEffect(() => {
     if (!prId) return;
 
-    const ws = new WebSocket(`ws://localhost:8000/ws/${prId}`);
+    const ws = new WebSocket(`${import.meta.env.VITE_WS_URL}/ws/${prId}`);
     wsRef.current = ws;
 
     ws.onopen = () => console.log("WebSocket connected:", prId);
