@@ -41,6 +41,22 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+  
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: code_review
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   backend:
     build:
@@ -57,6 +73,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   celery-worker:
@@ -71,6 +89,8 @@ services:
       kafka:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
     command: celery -A celery_app worker --loglevel=info --concurrency=2
   
@@ -98,3 +118,6 @@ services:
       - "3000:80"
     depends_on:
       - backend
+  
+volumes:
+  postgres_data:
